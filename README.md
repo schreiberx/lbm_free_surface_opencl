@@ -22,29 +22,27 @@ limitations under the License.
 
 required graphic card: NVIDIA with development drivers installed
 
-required packages:
-	libgl1-mesa-dev
-	libx11-dev
+## required packages
+* libgl1-mesa-dev
+* libx11-dev
 
 
-latest SDL2.0 version necessary:
-	hg clone http://hg.libsdl.org/SDL
+## latest SDL2.0 version
+* hg clone http://hg.libsdl.org/SDL
 
-latest SDL2_image version necessary:
-	hg clone http://hg.libsdl.org/SDL_image
-	configure SDL2_image with '--enable-jpg --disable-jpg-shared'
-
-
-
-scons has to be used when compiling lbm_opencl_fs.
+## latest SDL2_image version
+* hg clone http://hg.libsdl.org/SDL_image
+* configure SDL2_image with '--enable-jpg --disable-jpg-shared'
 
 
-EXECUTION:
-	e.g.
-	./build/lbm_opencl_fs_gnu_debug  -c -n -g -X 32
-	to start with volume resolution of 32x32x32.
-	More options are printed to the console with the '-h' program parameter.
 
+# Execution
+e.g.
 
-for balanceboard:
-	git clone git://github.com/abstrakraft/cwiid.git
+./build/lbm_opencl_fs_gnu_debug  -c -n -g -X 32
+
+to start with volume resolution of 32x32x32.
+More options are printed to the console with the '-h' program parameter.
+
+# Wii Balanceboard
+git clone git://github.com/abstrakraft/cwiid.git
