@@ -1,0 +1,145 @@
+// use opengl 3.2 core shaders
+
+
+out vec4 frag_data;
+
+uniform sampler3D volume_texture;
+uniform sampler2DRect back_texture;
+
+uniform float step_length;
+
+uniform mat4 pvm_matrix;
+uniform mat4 view_matrix;
+uniform mat4 model_matrix;
+uniform mat3 model_normal_matrix3;
+uniform mat3 view_model_normal_matrix3;
+
+uniform vec3 texture_size = vec3(8,8,8);
+uniform vec3 inv_texture_size = vec3(1,1,1)/vec3(8,8,8);
+uniform vec3 texture_size_add_one = vec3(8+1,8+1,8+1);
+uniform vec3 inv_texture_size_add_one = vec3(1,1,1)/vec3(8+1,8+1,8+1);
+
+uniform vec3 gradient_delta;
+
+#define ISO_VALUE	0.5f
+
+
+vec4 blinnShading(	vec4 material_color,	///< color of material
+					vec3 view_normal3,			///< normal of fragment in viewspace
+					vec3 view_position3		///< position of fragment in viewspace
+);
+
+
+/**
+ * follow a ray until an isosurface is hit
+ *
+ * input:
+ * 	_pos:	start_position
+ * 	_dir:	direction
+ *
+ * output:
+ *  _normal:	normal at isosurface
+ *  _exit:		true, if ray exists from surface
+ */
+
+vec3 _pos;		// position of current ray
+vec3 _dir;		// direction of current ray
+vec3 _normal;
+bool _exit;
+
+void rayCast()
+{
+	/**
+	 * compute distance to intersection with box [0,0,0]x[1,1,1]
+	 */
+	vec3 collide_surface = vec3(greaterThanEqual(_dir, vec3(0,0,0)));
+	vec3 dist = (collide_surface - _pos)/_dir;
+
+	float max_dist = min(min(min(dist[0], dist[1]), dist[2]), sqrt(3.0));
+
+	for (float step_fac = 0; step_fac < max_dist; step_fac += step_length)
+	{
+		vec3 current_pos = _pos + _dir*step_fac;
+
+		float current_value = texture(volume_texture, current_pos).r;
+
+		if (current_value >= ISO_VALUE)
+		{
+//#define prev_pos	_normal
+//#define prev_value	step_fac
+			// abuse _normal as previous position
+			vec3 prev_pos = _pos + _dir*(step_fac-step_length);
+			// abuse step_fac for
+			float prev_value = texture(volume_texture, prev_pos).r;
+
+			// compute interpolated position
+			_pos = (	prev_pos*(current_value - ISO_VALUE) +
+						current_pos*(ISO_VALUE - prev_value)
+					)	/	(current_value - prev_value);
+
+			// interpolate between prev and current value
+			_pos = (	prev_pos*(current_value - ISO_VALUE) +
+						current_pos*(ISO_VALUE - prev_value)
+					)	/ (current_value - prev_value);
+//			_pos = prev_pos;
+//#undef prev_pos
+//#undef prev_value
+#if 0
+			current_value = texture(volume_texture, _pos).r;
+
+			_normal = normalize(
+				vec3(	current_value - texture(volume_texture, _pos+vec3(+gradient_delta.x*2.0,0,0)).r,
+						current_value - texture(volume_texture, _pos+vec3(0,+gradient_delta.y*2.0,0)).r,
+						current_value - texture(volume_texture, _pos+vec3(0,0,+gradient_delta.z*2.0)).r
+					));
+#else
+			_normal = normalize(
+				vec3(
+						texture(volume_texture, _pos+vec3(-gradient_delta.x,0,0)).r - texture(volume_texture, _pos+vec3(+gradient_delta.x,0,0)).r,
+						texture(volume_texture, _pos+vec3(0,-gradient_delta.y,0)).r - texture(volume_texture, _pos+vec3(0,+gradient_delta.y,0)).r,
+						texture(volume_texture, _pos+vec3(0,0,-gradient_delta.z)).r - texture(volume_texture, _pos+vec3(0,0,+gradient_delta.z)).r
+					));
+#endif
+			return;
+		}
+	}
+
+	_exit = true;
+}
+
+
+in vec3 pos_in;
+in vec3 dir_in;
+
+void main(void)
+{
+	_pos = pos_in;
+	_dir = normalize(dir_in*inv_texture_size);	// world space to volume space
+
+	_exit = false;
+
+	rayCast();
+
+	if (_exit)	discard;
+
+	/**
+	 * scene_volume_position is the coordinate in model space when drawing.
+	 * by translating and scaling this way, the corners of the volume match exactly the volume box
+	 */
+	vec4 scene_volume_position = vec4(_pos*vec3(2.f,2.f,2.f)-vec3(1.f,1.f,1.f), 1);
+	frag_data = blinnShading(	vec4(1,1,1,1),
+								normalize(view_model_normal_matrix3*_normal),
+								vec3(view_matrix*model_matrix*scene_volume_position)
+							);
+
+	/**
+	 * we have to update the depth value
+	 *
+	 * look at 2.13.1 Controlling the Viewport in the OpenGL 3.2 (Core Profile) specification
+	 * for this operations (we have to remap the depth values)
+	 */
+	vec4 frag_pos = pvm_matrix*scene_volume_position;
+	float frag_depth = frag_pos.z / frag_pos.w;
+	gl_FragDepth = (gl_DepthRange.diff*frag_depth+(gl_DepthRange.near+gl_DepthRange.far))*0.5;
+	return;
+}

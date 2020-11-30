@@ -1,0 +1,12 @@
+# Blender3D MTL File: fluid_border.blend
+# Material Count: 1
+newmtl Material.001
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.517114 0.603923 0.000000
+Ks 0.574450 0.574450 0.574450
+Ni 1.000000
+d 1.000000
+illum 2
+
+

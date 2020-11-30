@@ -1,0 +1,36 @@
+#! /bin/bash
+
+FILES=""
+FILES+=" *.hpp"
+FILES+=" cl_programs/*.cl"
+FILES+=" shaders/*/*"
+FILES+=" lib/*.hpp"
+FILES+=" libgl/*.hpp"
+FILES+=" libmath/*.hpp"
+FILES+=" libcl/*.hpp"
+
+FILENAMES=$FILES
+SUM="0"
+for FILE in $FILENAMES; do
+	CONTENT=`cat $FILE 2>/dev/null`
+
+	NEWCONTENT="x $CONTENT"
+
+	echo -n "$FILE: "
+	while `test "$CONTENT" != "$NEWCONTENT"`; do
+		echo -n "."
+		CONTENT="$NEWCONTENT"
+		NEWCONTENT="`echo -n "$CONTENT" | sed 's/[{}()\\"+/\*-|:,;\.]//' | sed 's/-//' | sed 's/\t/ /' | sed 's/^  //'`"
+	done
+	CONTENT="$NEWCONTENT"
+#	echo -n "x $CONTENT x"
+#	echo "$CONTENT"
+#	read
+
+	COUNT=$((`echo -n "$CONTENT" | grep "." | wc -w`-1))
+	echo " ($COUNT)"
+	SUM=$((SUM+COUNT))
+done
+
+echo
+echo "$SUM words"

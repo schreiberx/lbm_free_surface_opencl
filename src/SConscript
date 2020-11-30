@@ -1,0 +1,34 @@
+Import('env')
+
+for i in env.Glob('main.cpp'):
+	env.src_files.append(env.Object(i))
+
+for i in env.Glob('CMainVisualization.cpp'):
+	env.src_files.append(env.Object(i))
+
+
+if env['balanceboard'] == 'true':
+	for i in env.Glob('CWiiBalanceBoard.cpp'):
+		env.src_files.append(env.Object(i))
+else:
+	for i in env.Glob('CWiiBalanceBoardFake.cpp'):
+		env.src_files.append(env.Object(i))
+
+
+for i in env.Glob('lib/*.cpp'):
+	env.src_files.append(env.Object(i))
+
+for i in env.Glob('mainvis/*.cpp'):
+	env.src_files.append(env.Object(i))
+
+for i in env.Glob('libgl/hud/*.cpp'):
+	env.src_files.append(env.Object(i))
+
+for i in env.Glob('libgl/marching_cubes/*.cpp'):
+	env.src_files.append(env.Object(i))
+
+for i in env.Glob('shaders/shader_color/*.cpp'):
+	env.src_files.append(env.Object(i))
+
+
+Export('env')

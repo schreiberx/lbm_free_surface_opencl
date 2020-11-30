@@ -1,0 +1,25 @@
+#! /bin/bash
+
+FILES=""
+FILES+=" *.hpp"
+FILES+=" cl_programs/*.cl"
+FILES+=" shaders/*/*"
+FILES+=" shaders/*/*/*"
+FILES+=" lib/*.hpp"
+FILES+=" lbm/*.hpp"
+FILES+=" libgl/*.hpp"
+FILES+=" libgl/*/*.hpp"
+FILES+=" libmath/*.hpp"
+FILES+=" libopencl/*.hpp"
+FILES+=" mainvis/*.hpp"
+
+FILENAMES=$FILES
+SUM=$((0))
+for FILE in $FILENAMES; do
+	COUNT=`cat $FILE 2>/dev/null | grep "[a-Z]" | wc -l`
+	echo "$FILE: $COUNT"
+	SUM=$((SUM+COUNT))
+done
+
+echo
+echo "$SUM lines with characters"

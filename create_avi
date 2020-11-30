@@ -1,0 +1,12 @@
+#! /bin/sh
+
+#FILES="mf://screenshots/*[02468].bmp";
+#FILES="mf://screenshots/*[02468]0.bmp";
+#FILES="mf://screenshots/*00.bmp";
+#FILES="mf://screenshots/*0.bmp";
+#FILES="mf://screenshots/*.bmp";
+
+#mencoder $FILES -mf fps=25 -o output.avi -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=3000
+#mencoder $FILES -mf fps=25 -o output.mpeg -ovc lavc -lavcopts vcodec=mpeg2video:vbitrate=5000
+
+ffmpeg -r 20 -i screenshots/screenshot_%08d.bmp -b $((16*1024))k output.mpeg

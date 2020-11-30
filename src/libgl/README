@@ -1,0 +1,6 @@
+core/				core opengl files for abstraction of opengl functions
+draw/				classes to draw simple objects (planes, quads, volume boxes, etc.)
+marching_cubes/		different volume renderers using marching cubes extraction
+opencl/				opencl specific classes (e.g. volume raw texture2d to flat texture conversion)
+volume_renderer/	direct volume renderers using ray casting
+hud/				useful things for HUDs. e.g. windows, font rendering, configuration dialog
