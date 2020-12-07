@@ -755,7 +755,7 @@ public:
 														cKernelLbmInit_WorkGroupSize
 						);
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 		this->resetFluid_Interface();
 
@@ -871,7 +871,7 @@ public:
 														global_work_group_size,
 														cl::NDRange(cKernelLbmBeta_Propagation_WorkGroupSize)
                                             );
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueCopyBuffer(		this->cMemNewDensityDistributions,
 													this->cMemDensityDistributions,
@@ -894,7 +894,7 @@ public:
                                                     this->domain_cells_count*sizeof(T)
                                             );
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 #endif
 		}
@@ -988,7 +988,7 @@ public:
 														&cKernelLbmAlpha_Propagation_WorkGroupSize
                                             );
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueCopyBuffer(	this->cMemNewDensityDistributions,
 												this->cMemDensityDistributions,
@@ -1011,7 +1011,7 @@ public:
 												this->domain_cells_count*sizeof(T)
                                             );
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 #endif
 		}
@@ -1033,7 +1033,7 @@ public:
 														cl::NDRange(cKernelLbmMassScale_WorkGroupSize)
 						);
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 	}
 
 	/**
@@ -1056,7 +1056,7 @@ public:
 													cl::NDRange(cKernelLbmBeta_Pre_WorkGroupSize)
 							);
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueNDRangeKernel(	cKernelLbmBeta_Main,	// kernel
 													cl::NullRange,					// global work offset
@@ -1064,7 +1064,7 @@ public:
 													cl::NDRange(cKernelLbmBeta_Main_WorkGroupSize)
 							);
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueNDRangeKernel(	cKernelLbmBeta_InterfaceToFluidNeighbors,	// kernel
 													cl::NullRange,					// global work offset
@@ -1072,7 +1072,7 @@ public:
 													cl::NDRange(cKernelLbmBeta_InterfaceToFluidNeighbors_WorkGroupSize)
 							);
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueNDRangeKernel(	cKernelLbmBeta_InterfaceToGas,	// kernel
 													cl::NullRange,					// global work offset
@@ -1080,7 +1080,7 @@ public:
 													cl::NDRange(cKernelLbmBeta_InterfaceToGas_WorkGroupSize)
 							);
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueNDRangeKernel(	cKernelLbmBeta_InterfaceToGasNeighbors,	// kernel
 													cl::NullRange,					// global work offset
@@ -1088,7 +1088,7 @@ public:
 													cl::NDRange(cKernelLbmBeta_InterfaceToGasNeighbors_WorkGroupSize)
 							);
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueNDRangeKernel(	cKernelLbmBeta_GatherMass,	// kernel
 													cl::NullRange,				// global work offset
@@ -1096,7 +1096,7 @@ public:
 													cl::NDRange(cKernelLbmBeta_GatherMass_WorkGroupSize)
 							);
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueNDRangeKernel(	cKernelLbmBeta_GasToInterface,	// kernel
 													cl::NullRange,				// global work offset
@@ -1104,7 +1104,7 @@ public:
 													cl::NDRange(cKernelLbmBeta_GasToInterface_WorkGroupSize)
 							);
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 #else
 //			std::cout << "beta propagation" << std::endl;
@@ -1114,7 +1114,7 @@ public:
 														cl::NDRange(cKernelLbmBeta_Propagation_WorkGroupSize)
                                             );
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueCopyBuffer(	this->cMemNewDensityDistributions,
 												this->cMemDensityDistributions,
@@ -1137,7 +1137,7 @@ public:
 												this->domain_cells_count*sizeof(T)
                                             );
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 #endif
 		}
 		else
@@ -1151,7 +1151,7 @@ public:
 													cl::NDRange(cKernelLbmAlpha_Pre_WorkGroupSize)
 							);
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueNDRangeKernel(	cKernelLbmAlpha_Main,	// kernel
 													cl::NullRange,					// global work offset
@@ -1159,28 +1159,28 @@ public:
 													cl::NDRange(cKernelLbmAlpha_Main_WorkGroupSize)
 							);
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueNDRangeKernel(	cKernelLbmAlpha_InterfaceToFluidNeighbors,	// kernel
 													cl::NullRange,					// global work offset
 													global_work_group_size,
 													cl::NDRange(cKernelLbmAlpha_InterfaceToFluidNeighbors_WorkGroupSize)
 							);
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueNDRangeKernel(	cKernelLbmAlpha_InterfaceToGas,	// kernel
 													cl::NullRange,					// global work offset
 													global_work_group_size,
 													cl::NDRange(cKernelLbmAlpha_InterfaceToGas_WorkGroupSize)
 							);
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueNDRangeKernel(	cKernelLbmAlpha_InterfaceToGasNeighbors,	// kernel
 													cl::NullRange,					// global work offset
 													global_work_group_size,
 													cl::NDRange(cKernelLbmAlpha_InterfaceToGasNeighbors_WorkGroupSize)
 							);
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueNDRangeKernel(	cKernelLbmAlpha_GatherMass,	// kernel
 													cl::NullRange,					// global work offset
@@ -1188,14 +1188,14 @@ public:
 													cl::NDRange(cKernelLbmAlpha_GatherMass_WorkGroupSize)
 							);
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 			this->cl.cCommandQueue.enqueueNDRangeKernel(	cKernelLbmAlpha_GasToInterface,	// kernel
 													cl::NullRange,					// global work offset
 													global_work_group_size,
 													cl::NDRange(cKernelLbmAlpha_GasToInterface_WorkGroupSize)
 							);
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 #else
 //			std::cout << "alpha propagation" << std::endl;
@@ -1205,7 +1205,7 @@ public:
                     								cl::NDRange(cKernelLbmAlpha_Propagation_WorkGroupSize)
                                             );
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			this->cl.cCommandQueue.enqueueCopyBuffer(	this->cMemNewDensityDistributions,
 												this->cMemDensityDistributions,
@@ -1228,7 +1228,7 @@ public:
 												this->domain_cells_count*sizeof(T)
                                             );
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 #endif
 		}

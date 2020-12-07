@@ -564,7 +564,7 @@ public:
 														cl::NDRange(cKernelLbm_Init_WorkGroupSize)
 						);
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 		// also initialize cMemNewDensityDistributions to avoid infinite velocities from gas cells!
 		this->cl.cCommandQueue.enqueueCopyBuffer(
@@ -575,7 +575,7 @@ public:
 											this->domain_cells_count*this->SIZE_DD_HOST_BYTES
                                         );
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 		this->resetFluid_Interface();
 
@@ -597,7 +597,7 @@ public:
 												cl::NDRange(cKernelLbm_MassScale_WorkGroupSize)
 						);
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 	}
 
 	/**
@@ -610,7 +610,7 @@ public:
 		 * collision kernels are inserted as 1d kernels because they work cell wise without neighboring information
 		 */
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 		/*
 		 * PRE
@@ -621,7 +621,7 @@ public:
 												cl::NDRange(cKernelLbm_Alpha_Pre_WorkGroupSize)
 						);
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 		/*
 		 * MAIN
@@ -633,7 +633,7 @@ public:
 												cl::NDRange(cKernelLbm_Main_WorkGroupSize)
 						);
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 
 		/*
@@ -645,7 +645,7 @@ public:
 												cl::NDRange(global_work_group_size_a[0]),
 												cl::NDRange(cKernelLbm_InterfaceToFluidNeighbors_WorkGroupSize)
 						);
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 
 		/*
@@ -656,7 +656,7 @@ public:
 												cl::NDRange(global_work_group_size_a[0]),
 												cl::NDRange(cKernelLbm_InterfaceToGas_WorkGroupSize)
 						);
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 
 		/*
@@ -670,7 +670,7 @@ public:
 												cl::NDRange(cKernelLbm_GatherMass_WorkGroupSize)
 						);
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 
 		/*
@@ -681,7 +681,7 @@ public:
 												cl::NDRange(global_work_group_size_a[0]),
 												cl::NDRange(cKernelLbm_InterfaceToGasNeighbors_WorkGroupSize)
 						);
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 
 		/*
@@ -693,14 +693,14 @@ public:
 												cl::NDRange(cKernelLbm_GasToInterface_WorkGroupSize)
 						);
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 		this->cl.cCommandQueue.enqueueNDRangeKernel(	cKernelLbm_AA_Helper,     // kernel
                                                 cl::NullRange,                              // global work offset
                                                 cl::NDRange(global_work_group_size_a[0]),
                                                 cl::NDRange(cKernelLbm_AA_Helper_WorkGroupSize)
                                         );
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 		this->cl.cCommandQueue.enqueueCopyBuffer(		this->cMemNewDensityDistributions,
 												this->cMemDensityDistributions,
@@ -709,7 +709,7 @@ public:
 												this->domain_cells_count*sizeof(T)*19
 										);
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 		this->cl.cCommandQueue.enqueueCopyBuffer(		this->cMemNewFluidFraction,
 												this->cMemFluidFraction,
 												0,
@@ -717,7 +717,7 @@ public:
 												this->domain_cells_count*sizeof(T)
 										);
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 		this->cl.cCommandQueue.enqueueCopyBuffer(		this->cMemNewCellFlags,
 												this->cMemCellFlags,
 												0,
@@ -725,7 +725,7 @@ public:
 												this->domain_cells_count*sizeof(T)
 										);
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 		this->simulation_step_counter++;
 	}
@@ -736,7 +736,7 @@ public:
 		 * collision kernels are inserted as 1d kernels because they work cell wise without neighboring information
 		 */
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 		if (this->simulation_step_counter & 1)
 		{
@@ -758,7 +758,7 @@ public:
 													cl::NDRange(cKernelLbm_Main_WorkGroupSize)
 							);
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			/*
 			 * INTERFACE TO FLUID NEIGHBORS
@@ -771,7 +771,7 @@ public:
 													cl::NDRange(global_work_group_size_a[0]),
 													cl::NDRange(cKernelLbm_InterfaceToFluidNeighbors_WorkGroupSize)
 							);
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			/*
 			 * INTERFACE TO GAS
@@ -784,7 +784,7 @@ public:
 													cl::NDRange(global_work_group_size_a[0]),
 													cl::NDRange(cKernelLbm_InterfaceToGas_WorkGroupSize)
 							);
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			/*
 			 * GATHER MASS
@@ -799,7 +799,7 @@ public:
 													cl::NDRange(cKernelLbm_GatherMass_WorkGroupSize)
 							);
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			/*
 			 * INTERFACE TO GAS NEIGHBORS
@@ -813,7 +813,7 @@ public:
 													cl::NDRange(global_work_group_size_a[0]),
 													cl::NDRange(cKernelLbm_InterfaceToGasNeighbors_WorkGroupSize)
 							);
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			/*
 			 * GAS TO INTERFACE
@@ -830,7 +830,7 @@ public:
 
 			////////////////////////////////////
 			#if 0
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 					this->cl.cCommandQueue.enqueueCopyBuffer(		this->cMemDensityDistributions,
 															this->cMemNewDensityDistributions,
 			                                                0,
@@ -852,7 +852,7 @@ public:
 			                                                this->domain_cells_count*sizeof(T)
 			                                        );
 
-					this->cl.cCommandQueue.enqueueBarrier();
+					this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 			#endif
 			////////////////////////////////////
 		}
@@ -878,7 +878,7 @@ public:
 													cl::NDRange(global_work_group_size_a[0]),
 													cl::NDRange(cKernelLbm_Main_WorkGroupSize)
 							);
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 			/*
 			 * INTERFACE TO FLUID NEIGHBORS
@@ -892,7 +892,7 @@ public:
 													cl::NDRange(global_work_group_size_a[0]),
 													cl::NDRange(cKernelLbm_InterfaceToFluidNeighbors_WorkGroupSize)
 							);
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 
 			/*
@@ -907,7 +907,7 @@ public:
 													cl::NDRange(global_work_group_size_a[0]),
 													cl::NDRange(cKernelLbm_InterfaceToGas_WorkGroupSize)
 							);
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 
 
@@ -924,7 +924,7 @@ public:
 													cl::NDRange(cKernelLbm_GatherMass_WorkGroupSize)
 							);
 
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 
 			/*
@@ -940,7 +940,7 @@ public:
 													cl::NDRange(global_work_group_size_a[0]),
 													cl::NDRange(cKernelLbm_InterfaceToGasNeighbors_WorkGroupSize)
 							);
-			this->cl.cCommandQueue.enqueueBarrier();
+			this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 
 			/*
@@ -959,7 +959,7 @@ public:
 
 			////////////////////////////////////
 			#if 0
-				this->cl.cCommandQueue.enqueueBarrier();
+				this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 				this->cl.cCommandQueue.enqueueCopyBuffer(		this->cMemNewDensityDistributions,
 														this->cMemDensityDistributions,
 														0,
@@ -967,7 +967,7 @@ public:
 														this->domain_cells_count*sizeof(T)*19
 												);
 
-				this->cl.cCommandQueue.enqueueBarrier();
+				this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 				this->cl.cCommandQueue.enqueueCopyBuffer(		this->cMemNewFluidFraction,
 														this->cMemFluidFraction,
 														0,
@@ -975,7 +975,7 @@ public:
 														this->domain_cells_count*sizeof(T)
 												);
 
-				this->cl.cCommandQueue.enqueueBarrier();
+				this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 				this->cl.cCommandQueue.enqueueCopyBuffer(		this->cMemNewCellFlags,
 														this->cMemCellFlags,
 														0,
@@ -986,7 +986,7 @@ public:
 			////////////////////////////////////
 		}
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 		this->simulation_step_counter++;
 	}

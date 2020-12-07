@@ -235,7 +235,7 @@ public:
 		std::vector<cl::Memory> glObjects(1, cMemFluidFractionFlatTexture);
 
 		CL_CHECK_ERROR(cl.cCommandQueue.enqueueAcquireGLObjects(&glObjects));
-		cl.cCommandQueue.enqueueBarrier();
+		cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 		CL_CHECK_ERROR(cl.cCommandQueue.enqueueCopyBufferToImage(	getFluidFractionMemObject(),
 													cMemFluidFractionFlatTexture,
@@ -254,9 +254,9 @@ public:
 													));
 		}
 
-		cl.cCommandQueue.enqueueBarrier();
+		cl.cCommandQueue.enqueueBarrierWithWaitList();
 		cl.cCommandQueue.enqueueReleaseGLObjects(&glObjects);
-		cl.cCommandQueue.enqueueBarrier();
+		cl.cCommandQueue.enqueueBarrierWithWaitList();
 		cl.cCommandQueue.finish();
 		glFinish();
 	}
@@ -269,7 +269,7 @@ public:
 		std::vector<cl::Memory> glObjects(1, cMemFluidFractionTexture);
 
 		cl.cCommandQueue.enqueueAcquireGLObjects(&glObjects);
-		cl.cCommandQueue.enqueueBarrier();
+		cl.cCommandQueue.enqueueBarrierWithWaitList();
 
 		const size_t origin[3] = {0,0,0};
 		const size_t domain_cells[3] = {domain_cells[0], domain_cells[1], domain_cells[2]};
@@ -279,9 +279,9 @@ public:
 													0,
 													origin, domain_cells));
 
-		cl.cCommandQueue.enqueueBarrier();
+		cl.cCommandQueue.enqueueBarrierWithWaitList();
 		cl.cCommandQueue.enqueueReleaseGLObjects(&glObjects);
-		cl.cCommandQueue.enqueueBarrier();
+		cl.cCommandQueue.enqueueBarrierWithWaitList();
 		cl.cCommandQueue.finish();
 		glFinish();
 	}
@@ -521,7 +521,7 @@ public:
 											0,
 											byte_size,
 											dst));
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 	}
 
 	/**
@@ -539,7 +539,7 @@ public:
 											0,
 											byte_size,
 											dst));
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 	}
 
 	/**
@@ -557,7 +557,7 @@ public:
 											0,
 											byte_size,
 											dst));
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 	}
 
 	/**
@@ -575,7 +575,7 @@ public:
 											0,
 											byte_size,
 											dst));
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 	}
 
 	/**
@@ -606,7 +606,7 @@ public:
 												dst));
 		}
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 	}
 
 	/**
@@ -636,7 +636,7 @@ public:
 												dst));
 		}
 
-		this->cl.cCommandQueue.enqueueBarrier();
+		this->cl.cCommandQueue.enqueueBarrierWithWaitList();
 	}
 
 public:
@@ -802,7 +802,7 @@ public:
 				T p_d_timestep ,						///< timestep for one simulation step (always set to -1 for automatic computation)
 				T p_mass_exchange_factor,				///< mass exchange
 
-				size_t p_max_local_work_group_size,		///< maximum count of computation kernels (threads) used on gpu
+				size_t p_max_local_work_group_size,		///< maximum count of computation kernels (threads)
 
 				int init_flags,							///< flags for first initialization
 
@@ -876,8 +876,7 @@ public:
 		source += filename;
 		source += "\"";
 
-		cl::Program::Sources sources(1, std::make_pair(source.c_str(), source.size()));;
-		ccl_program = cl::Program(this->cl.cContext, sources);
+		ccl_program = cl::Program(this->cl.cContext, source);
 
 		std::string ocl_build_parameters = "";
 		ocl_build_parameters += "-I ./";

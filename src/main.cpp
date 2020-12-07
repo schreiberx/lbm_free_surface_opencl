@@ -36,7 +36,6 @@ extern "C" {
 #include "lbm/CLbmOpenClAB_1.hpp"
 #include "lbm/CLbmOpenClAB_2.hpp"
 #include "lbm/CLbmOpenClAB_1_shared_memory.hpp"
-#include "lbm/CLbmOpenClAB_stack.hpp"
 
 #include "libopencl/CCLSkeleton.hpp"
 #include "lib/CStopwatch.hpp"
@@ -125,7 +124,7 @@ int run(int argc, char *argv[])
 
 	int init_flag = -1;
 
-	size_t computation_kernel_count = 128;
+	size_t computation_kernel_count = 0;
 
 	int device_nr = -1;
 	int platform_nr = -1;
@@ -412,11 +411,6 @@ parameter_error_ok:
 				cLbmOpenCl = new CLbmOpenClAB_1_shared_memory<T>(*cCLSkeleton, verbose);
 				break;
 
-			case 4:
-				// standard lbm layout version 1 with stack utilization
-				cLbmOpenCl = new CLbmOpenClAB_1_stack<T>(*cCLSkeleton, verbose);
-				break;
-
 			default:
 				// alpha-beta kernel
 				cLbmOpenCl = new CLbmOpenClAA<T>(*cCLSkeleton, verbose);
@@ -431,6 +425,14 @@ parameter_error_ok:
 
 		if (verbose)
 			std::cout << "init flag: " << init_flag << std::endl;
+
+		if (computation_kernel_count == 0)
+		{
+			int default_work_group_size;
+			cCLSkeleton->cDevice.getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT, &default_work_group_size);
+
+			computation_kernel_count = default_work_group_size;
+		}
 
 		cLbmOpenCl->init(
 						domain_cells,

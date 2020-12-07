@@ -25,17 +25,19 @@
 #ifndef CCLSKELETON_HPP_
 #define CCLSKELETON_HPP_
 
+#define CL_HPP_MINIMUM_OPENCL_VERSION 120
+#define CL_HPP_TARGET_OPENCL_VERSION 120
+#include <CL/opencl.hpp>
+
 #include "lib/CError.hpp"
 #include "libopencl/CCLErrors.hpp"
 #include <libgl/incgl3.h>
+#include <exception>
 
 #ifdef C_GL_TEXTURE_HPP
 #define __gl_h_	1
 #endif
 
-//#define CL_USE_DEPRECATED_OPENCL_1_1_APIS	1
-#include <CL/opencl.h>
-#include <CL/cl.hpp>
 
 #ifdef C_GL_TEXTURE_HPP
 	#include <CL/cl_gl.h>
@@ -423,17 +425,19 @@ public:
 	/**
 	 * initialize OpenCL skeleton
 	 */
-	void initCL(	int p_device_nr = -1,		///< device number (use -1 to list available devices)
-					int p_platform_nr = -1		///< platform number (use -1 to list available platforms)
+	void initCL(	int p_device_nr = -2,		///< device number (use -1 to list available devices, -2: autodetect)
+					int p_platform_nr = -2		///< platform number (use -1 to list available platforms, -2: autodetect)
 	)
 	{
 		// load platform information
-		if (verbose)	std::cout << "loading platforms" << std::endl;
+		if (verbose)
+			std::cout << "loading platforms" << std::endl;
+
 		cl::Platform::get(&cPlatforms);
 
 		if (cPlatforms.size() == 0)
 		{
-			error << "no platform found!" << std::endl;
+			throw std::runtime_error("No OpenCL Platform found!");
 			return;
 		}
 
@@ -441,62 +445,56 @@ public:
 		{
 			for (size_t i = 0; i < cPlatforms.size(); i++)
 			{
-				cl::STRING_CLASS profile_string;
-				cl::STRING_CLASS tmp_string;
+				cl::string profile_string;
+				cl::string tmp_string;
 				cPlatforms[i].getInfo(CL_PLATFORM_PROFILE, &profile_string);
 
-				if (verbose)
-				{
-					std::cout << "Platform " << (i) << ":" << std::endl;
+				std::cout << "****************************************" << std::endl;
+				std::cout << "Platform " << (i) << ":" << std::endl;
+				std::cout << "****************************************" << std::endl;
 
-					cPlatforms[i].getInfo(CL_PLATFORM_NAME, &tmp_string);
-					std::cout << "        Name: " << tmp_string << std::endl;
-					std::cout << "     Profile: " << profile_string << std::endl;
-					cPlatforms[i].getInfo(CL_PLATFORM_VERSION, &tmp_string);
-					std::cout << "     Version: " << tmp_string << std::endl;
-					cPlatforms[i].getInfo(CL_PLATFORM_VENDOR, &tmp_string);
-					std::cout << "      Vendor: " << tmp_string << std::endl;
-					cPlatforms[i].getInfo(CL_PLATFORM_EXTENSIONS, &tmp_string);
-					std::cout << "  Extensions: " << tmp_string << std::endl;
-					std::cout << std::endl;
-				}
-
-				/**
-				 * autodetect platform
-				 */
-				if (p_platform_nr == -1)
-					if (profile_string == "FULL_PROFILE")
-						p_platform_nr = i;
-
-				if (verbose && (p_platform_nr == (int)i))
-				{
-					std::cout << ">>> Using Platform " << (i) << " for simulation" << std::endl;
-					std::cout << std::endl;
-				}
+				cPlatforms[i].getInfo(CL_PLATFORM_NAME, &tmp_string);
+				std::cout << " +       Name: " << tmp_string << std::endl;
+				std::cout << " +    Profile: " << profile_string << std::endl;
+				cPlatforms[i].getInfo(CL_PLATFORM_VERSION, &tmp_string);
+				std::cout << " +    Version: " << tmp_string << std::endl;
+				cPlatforms[i].getInfo(CL_PLATFORM_VENDOR, &tmp_string);
+				std::cout << " +     Vendor: " << tmp_string << std::endl;
+				cPlatforms[i].getInfo(CL_PLATFORM_EXTENSIONS, &tmp_string);
+				std::cout << " + Extensions: " << tmp_string << std::endl;
+				std::cout << "****************************************" << std::endl;
+				std::cout << std::endl;
 			}
+
+			throw std::runtime_error("Please choose platform with option -P [platform nr]");
+			return;
 		}
 
-		if (p_platform_nr == -1)
+		if (p_platform_nr == -2)
 		{
-			error << "no usable platform found... exiting" << std::endl;
-			return;
+			p_platform_nr = 0;
+			std::cout << "Using default platform number " << p_platform_nr << std::endl;
 		}
 
 		if (p_platform_nr < 0 || p_platform_nr >= (int)cPlatforms.size())
 		{
-			error << "invalid platform number - use option \"-P -1\" and verbose mode \"-v\" to list all devices" << std::endl;
+			throw std::runtime_error("invalid platform number - use option \"-P -1\" to list all devices");
 			return;
 		}
 
 		cPlatform = cPlatforms[p_platform_nr];
 
 		// load devices belonging to platform
-		if (verbose)	std::cout << "loading devices for platform " << p_platform_nr << std::endl;
+		if (verbose)
+		{
+			std::cout << "Using platform " << p_platform_nr << std::endl;
+			std::cout << "Loading devices for platform" << std::endl;
+		}
 		CL_CHECK_ERROR(cPlatform.getDevices(CL_DEVICE_TYPE_ALL, &cDevices));
 
 		if (cDevices.size() == 0)
 		{
-			error << "no devices found - aborting" << std::endl;
+			throw std::runtime_error("No OpenCL devices for this platform found!");
 			return;
 		}
 
@@ -505,50 +503,54 @@ public:
 			// list available devices
 			for (int i = 0; i < (int)cDevices.size(); i++)
 			{
-				cl::STRING_CLASS tmp_string;
+				cl::string tmp_string;
 				CDeviceInfo cDeviceInfo(cDevices[i]);
-				if (verbose)
-				{
-					std::cout << "Device " << (i) << ":" << std::endl;
-					std::cout << "        Type: " << cDeviceInfo.getTypeString() << std::endl;
-					std::cout << "        Name: " << cDeviceInfo.name << std::endl;
-					std::cout << "     Profile: " << cDeviceInfo.profile << std::endl;
-					std::cout << "     Version: " << cDeviceInfo.version << std::endl;
-					std::cout << "      Vendor: " << cDeviceInfo.vendor << std::endl;
-					std::cout << "  Extensions: " << cDeviceInfo.extensions << std::endl;
-					std::cout << std::endl;
-				}
 
-				if (p_device_nr == -1)
-					if (cDeviceInfo.device_type == CL_DEVICE_TYPE_GPU)
-						p_device_nr = i;
-
-				if (verbose && (p_device_nr == i))
-				{
-					std::cout << ">>> Using Device " << (i) << " for simulation" << std::endl;
-					std::cout << std::endl;
-				}
+				std::cout << std::endl;
+				std::cout << "****************************************" << std::endl;
+				std::cout << "Device " << (i) << ":" << std::endl;
+				std::cout << "****************************************" << std::endl;
+				std::cout << " +       Type: " << cDeviceInfo.getTypeString() << std::endl;
+				std::cout << " +       Name: " << cDeviceInfo.name << std::endl;
+				std::cout << " +    Profile: " << cDeviceInfo.profile << std::endl;
+				std::cout << " +    Version: " << cDeviceInfo.version << std::endl;
+				std::cout << " +     Vendor: " << cDeviceInfo.vendor << std::endl;
+				std::cout << " + Extensions: " << cDeviceInfo.extensions << std::endl;
+				std::cout << "****************************************" << std::endl;
+				std::cout << std::endl;
 			}
+
+			throw std::runtime_error("Please choose device with option -D [device nr]");
+		}
+
+		if (p_device_nr == -2)
+		{
+			p_device_nr = 0;
+			std::cout << "Using default device number " << p_device_nr << std::endl;
 		}
 
 		if (p_device_nr < 0 || p_device_nr >= (int)cDevices.size())
 		{
-			error << "invalid device number - use option \"-D -1\" and verbose mode \"-v\" to list all devices" << std::endl;
+			throw std::runtime_error("invalid device number - use option \"-D -1\" to list all devices");
 			return;
 		}
 
 		cDevice = cDevices[p_device_nr];
-//		CCL::CDevice &cDevice = cDevices[p_device_nr];
+
+		cl_int err;
 
 		// load standard context for devices
 		if (verbose)	std::cout << "loading context" << std::endl;
 		std::vector<cl::Device> tmp_devices(1, cDevice);
 
-		cContext = cl::Context(tmp_devices);
+		cl_context_properties properties[4] = {CL_CONTEXT_PLATFORM, (cl_context_properties)cPlatform(), 0, 0};
+
+		cContext = cl::Context(tmp_devices, properties, 0, 0, &err);
+		CL_CHECK_ERROR(err);
 
 		// initialize queue
 		if (verbose)	std::cout << "creating command queue" << std::endl;
-		cl_int err;
+
 		cCommandQueue = cl::CommandQueue(cContext, cDevice, 0, &err);
 		CL_CHECK_ERROR(err);
 	}
@@ -578,8 +580,8 @@ public:
 		{
 			for (size_t i = 0; i < cPlatforms.size(); i++)
 			{
-				cl::STRING_CLASS profile_string;
-				cl::STRING_CLASS tmp_string;
+				cl::string profile_string;
+				cl::string tmp_string;
 				cPlatforms[i].getInfo(CL_PLATFORM_PROFILE, &profile_string);
 				if (verbose)
 				{
